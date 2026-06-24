@@ -6,5 +6,28 @@ services:
       context: ./frontend
     container_name: react-nginx
     ports:
-      - "2031:80"
+      - "80"
     restart: unless-stopped
+  backend:
+    ports:
+      - 2032:80
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    container_name: laravel_backend
+    working_dir: /var/www
+    volumes:
+      - ./backend/backend_sertifikasi:/var/www/html
+    #command: bash -c "php artisan serve --host=0.0.0.0 --port=8000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_gateway
+    ports:
+      - "2031:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/dist:/usr/share/nginx/html
+    depends_on:
+      - frontend
+      - backend
