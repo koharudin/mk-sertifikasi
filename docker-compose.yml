@@ -2,12 +2,29 @@ version: '3.9'
 
 services:
   frontend:
+    restart: always
     build:
-      context: ./frontend
-    container_name: react-nginx
+      context: frontend
+      dockerfile: fe.Dockerfile
+    volumes:
+      - ./frontend:/app
     ports:
-      - "80"
-    restart: unless-stopped
+      - 93:3000
+    environment:
+      - API_URL=http://api.local:2027/backend/api
+      - NEXT_PUBLIC_API_URL=http://api.local:2027/backend/api
+      - NEXT_PUBLIC_APP_URL=http://api.local:2027
+      - NEXTAUTH_URL=http://api.local:2027
+      - NEXTAUTH_SECRET=/83vTMRaUYJObtDcbEa0AqhNXJ2gGVyNkol1nugIFi0=
+    extra_hosts:
+      - "api.local:host-gateway"
+    tty: true
+    command: >
+      sh -c "
+        if [ ! -d node_modules ]; then
+          npm install;
+        fi &&
+        npm run dev"
   backend:
     ports:
       - 2032:80
